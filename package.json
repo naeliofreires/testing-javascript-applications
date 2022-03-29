@@ -6,6 +6,7 @@
     "dev": "next dev",
     "test": "jest --env=jsdom",
     "test:watch": "jest --watchAll --env=jsdom",
+    "test:coverage": "jest --coverage --env=jsdom",
     "build": "next build",
     "start": "next start"
   },
