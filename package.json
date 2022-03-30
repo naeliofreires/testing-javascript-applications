@@ -5,6 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "test": "jest --env=jsdom",
+    "test:unit": "jest --env=jsdom --config=jest-unit.config.js",
+    "test:unit:watch": "jest --env=jsdom --config=jest-unit.config.js --watchAll",
+    "test:integration": "jest --env=jsdom --config=jest-integration.config.js",
+    "test:integration:watch": "jest --env=jsdom --config=jest-integration.config.js --watchAll",
     "test:watch": "jest --watchAll --env=jsdom",
     "test:coverage": "jest --coverage --env=jsdom",
     "build": "next build",
