@@ -27,6 +27,7 @@
     "@testing-library/dom": "8.11.2",
     "@testing-library/jest-dom": "5.16.1",
     "@testing-library/react": "^12.1.4",
+    "@testing-library/react-hooks": "^7.0.2",
     "@testing-library/user-event": "^13.5.0",
     "babel-jest": "^27.5.1",
     "faker": "^6.6.6",
@@ -34,7 +35,8 @@
     "jest-dom": "^4.0.0",
     "miragejs": "^0.1.43",
     "postcss-flexbugs-fixes": "4.2.1",
-    "postcss-preset-env": "^6.7.0"
+    "postcss-preset-env": "^6.7.0",
+    "react-test-renderer": "^16.9.0"
   },
   "resolutions": {
     "@jest/create-cache-key-function": "^27.5.1"
