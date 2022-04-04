@@ -5,7 +5,10 @@ export default function Search({ doSearch }) {
 
   return (
     <form
-      onSubmit={() => doSearch(term)}
+      onSubmit={(e) => {
+        e.preventDefault();
+        doSearch(term);
+      }}
       name="search-form"
       className="relative mt-6 max-w-lg mx-auto"
     >

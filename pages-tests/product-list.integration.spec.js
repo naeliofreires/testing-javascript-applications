@@ -1,4 +1,6 @@
-import { screen, render, waitFor } from '@testing-library/react';
+import { screen, render, waitFor, fireEvent, getByRole } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import ProductList from '../pages';
 import { makeServer } from '../miragejs/server';
 
@@ -49,6 +51,29 @@ describe('ProductList', () => {
       expect(screen.queryByTestId('error-message')).toBeInTheDocument();
 
       expect(screen.queryAllByTestId('product-card')).toHaveLength(0);
+    });
+  });
+
+  it('should filter the product list when a search is performed', async () => {
+    const searchValue = 'relogio x';
+    server.createList('product', 2);
+
+    server.create('product', { title: searchValue });
+
+    render(<ProductList />);
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('product-card')).toHaveLength(3);
+    });
+
+    const form = screen.getByRole('form');
+    const input = screen.getByRole('searchbox');
+
+    await userEvent.type(input, searchValue);
+    await fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('product-card')).toHaveLength(1);
     });
   });
 });
