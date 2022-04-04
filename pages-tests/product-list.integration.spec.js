@@ -25,8 +25,30 @@ describe('ProductList', () => {
     render(<ProductList />);
 
     await waitFor(() => {
-      // screen.debug(screen.getAllByTestId('product-card'));
       expect(screen.getAllByTestId('product-card')).toHaveLength(10);
+    });
+  });
+
+  it('should render the "no products message"', async () => {
+    render(<ProductList />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('no-products')).toBeInTheDocument();
+    });
+  });
+
+  it('should display error message when promise rejects', async () => {
+    server.get('products', () => {
+      throw new Error();
+    });
+
+    render(<ProductList />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('no-products')).toBeNull();
+      expect(screen.queryByTestId('error-message')).toBeInTheDocument();
+
+      expect(screen.queryAllByTestId('product-card')).toHaveLength(0);
     });
   });
 });
