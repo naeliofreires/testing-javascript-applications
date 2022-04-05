@@ -2,10 +2,13 @@
 import '../styles/globals.css';
 import Cart from '../components/cart';
 import { makeServer } from '../miragejs/server';
+import { useCartStore } from '../store/cart';
 
 process.env.NODE_ENV === 'development' && makeServer({ environment: 'development' });
 
 function MyApp({ Component, pageProps }) {
+  const toogle = useCartStore((store) => store.actions.toogle);
+
   return (
     <div className="bg-white">
       <header>
@@ -35,7 +38,10 @@ function MyApp({ Component, pageProps }) {
             </div>
             <div className="w-full text-gray-700 md:text-center text-2xl font-semibold">Brand</div>
             <div className="flex items-center justify-end w-full">
-              <button className="text-gray-600 focus:outline-none mx-4 sm:mx-0">
+              <button
+                onClick={() => toogle()}
+                className="text-gray-600 focus:outline-none mx-4 sm:mx-0"
+              >
                 <svg
                   className="h-5 w-5"
                   fill="none"
