@@ -8,4 +8,5 @@ module.exports = {
     '<rootDir>/pages/**/*.js',
     '<rootDir>/hooks/**/*.js',
   ],
+  coveragePathIgnorePatterns: ['<rootDir>/pages/_app.js'],
 };
