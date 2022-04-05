@@ -76,4 +76,53 @@ describe('ProductList', () => {
       expect(screen.getAllByTestId('product-card')).toHaveLength(1);
     });
   });
+
+  it('should display the total quantity of products', async () => {
+    server.createList('product', 10);
+
+    render(<ProductList />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/10 Products/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should display product (singular) when there is only product', async () => {
+    server.createList('product', 1);
+
+    render(<ProductList />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/1 Product$/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should display product (singular) when there is zero product', async () => {
+    server.createList('product', 0);
+
+    render(<ProductList />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/0 Product$/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should display proper quantity when list is filtered', async () => {
+    const searchValue = 'relogio x';
+    server.createList('product', 2);
+
+    server.create('product', { title: searchValue });
+
+    render(<ProductList />);
+
+    await waitFor(() => expect(screen.getByText(/3 Products/i)).toBeInTheDocument());
+
+    const form = screen.getByRole('form');
+    const input = screen.getByRole('searchbox');
+
+    await userEvent.type(input, searchValue);
+    await fireEvent.submit(form);
+
+    await waitFor(() => expect(screen.getByText(/1 Product/i)).toBeInTheDocument());
+  });
 });

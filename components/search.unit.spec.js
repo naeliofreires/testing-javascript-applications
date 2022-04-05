@@ -7,6 +7,10 @@ cleanup();
 const doSearch = jest.fn(); // mock function
 
 describe('Search', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render a form', () => {
     render(<Search doSearch={doSearch} />);
 
@@ -36,10 +40,22 @@ describe('Search', () => {
     const form = screen.getByRole('form');
     const input = screen.getByRole('searchbox');
 
-    // screen.debug(input);
     await userEvent.type(input, inputText);
     await fireEvent.submit(form);
 
     expect(doSearch).toHaveBeenCalledWith(inputText);
+  });
+
+  it('should call doSearch when search input is cleared', async () => {
+    render(<Search doSearch={doSearch} />);
+
+    const inputText = 'some value here';
+    const input = screen.getByRole('searchbox');
+
+    await userEvent.type(input, inputText);
+    await userEvent.clear(input);
+
+    expect(doSearch).toHaveBeenCalledTimes(1);
+    expect(doSearch).toHaveBeenCalledWith('');
   });
 });
