@@ -28,6 +28,17 @@ describe('Cart Store', () => {
     expect(store.current.state.products).toHaveLength(0);
   });
 
+  it('should not add same product twice', async () => {
+    const productA = server.create('product');
+    const productB = server.create('product');
+
+    act(() => store.current.actions.add(productA));
+    act(() => store.current.actions.add(productB));
+    act(() => store.current.actions.add(productB));
+
+    expect(store.current.state.products).toHaveLength(2);
+  });
+
   it('should add 2 products to the list', async () => {
     const products = server.createList('product', 2);
 
@@ -46,11 +57,13 @@ describe('Cart Store', () => {
     } = store.current;
 
     expect(store.current.state.open).toBe(false);
+    expect(store.current.state.products).toHaveLength(0);
 
     act(() => toogle());
     expect(store.current.state.open).toBe(true);
 
     act(() => store.current.actions.toogle());
     expect(store.current.state.open).toBe(false);
+    expect(store.current.state.products).toHaveLength(0);
   });
 });

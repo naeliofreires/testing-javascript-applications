@@ -9,20 +9,33 @@ export const useCartStore = create((set) => ({
   state: { ...initialState },
   actions: {
     reset: () =>
-      set(() => {
-        return { state: { ...initialState } };
+      set((store) => {
+        return { ...store, state: { ...initialState } };
       }),
+
     add: (product) =>
-      set((store) => ({
-        state: {
-          ...store.state,
-          open: true,
-          products: [...store.state.products, product],
-        },
-      })),
+      set((store) => {
+        const included = !!store.state.products.find((item) => item.id === product.id);
+
+        if (included) {
+          return store;
+        }
+
+        return {
+          state: {
+            ...store.state,
+            open: true,
+            products: [...store.state.products, product],
+          },
+        };
+      }),
+
     toogle: () =>
       set((store) => {
-        return { state: { open: !store.state.open } };
+        return {
+          ...store,
+          state: { ...store.state, open: !store.state.open },
+        };
       }),
   },
 }));

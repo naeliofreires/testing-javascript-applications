@@ -2,8 +2,12 @@ import CartItem from './cart-item';
 import { useCartStore } from '../store/cart';
 
 export default function Cart() {
-  const open = useCartStore((store) => store.state.open);
+  const { open, products } = useCartStore((store) => store.state);
   const toogle = useCartStore((store) => store.actions.toogle);
+
+  const renderProducts = () => {
+    return products.map((product) => <CartItem product={product} />);
+  };
 
   return (
     <div
@@ -29,7 +33,9 @@ export default function Cart() {
         </button>
       </div>
       <hr className="my-3" />
-      <CartItem />
+
+      {renderProducts()}
+
       <div className="mt-8">
         <form className="flex items-center justify-center">
           <input className="form-input w-48" type="text" placeholder="Add promocode" />
