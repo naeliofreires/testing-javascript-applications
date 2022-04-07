@@ -23,44 +23,50 @@ describe('Cart Store', () => {
    * @state.open
    */
   it('should return open equals false on initial state', async () => {
-    expect(store.current.state.open).toBe(false);
+    expect(result.current.state.open).toBe(false);
   });
 
   it('should return an empty array for products on initial state', () => {
-    expect(Array.isArray(store.current.state.products)).toBe(true);
-    expect(store.current.state.products).toHaveLength(0);
+    expect(Array.isArray(result.current.state.products)).toBe(true);
+    expect(result.current.state.products).toHaveLength(0);
   });
 
   it('should not add same product twice', async () => {
     const productA = server.create('product');
     const productB = server.create('product');
 
-    act(() => store.current.actions.add(productA));
-    act(() => store.current.actions.add(productB));
-    act(() => store.current.actions.add(productB));
+    HooksAction(() => {
+      result.current.actions.add(productA);
+    });
+    HooksAction(() => {
+      result.current.actions.add(productA);
+    });
+    HooksAction(() => {
+      result.current.actions.add(productB);
+    });
 
-    expect(store.current.state.products).toHaveLength(2);
+    expect(result.current.state.products).toHaveLength(2);
   });
 
   it('should add 2 products to the list', async () => {
     const products = server.createList('product', 2);
 
-    const { actions } = store.current;
-
     for (const product of products) {
-      act(() => actions.add(product));
+      HooksAction(() => {
+        result.current.actions.add(product);
+      });
     }
 
-    expect(store.current.state.products).toHaveLength(2);
+    expect(result.current.state.products).toHaveLength(2);
   });
 
   it('should toggle open state', async () => {
     const {
       actions: { toogle },
-    } = store.current;
+    } = result.current;
 
-    expect(store.current.state.open).toBe(false);
-    expect(store.current.state.products).toHaveLength(0);
+    expect(result.current.state.open).toBe(false);
+    expect(result.current.state.products).toHaveLength(0);
 
     HooksAction(() => toogle());
     expect(result.current.state.open).toBe(true);
