@@ -3,13 +3,12 @@ import { useState, useEffect, useMemo } from 'react';
 import Search from '../components/search';
 import ProductCard from '../components/product-card';
 import { useFetchProducts } from '../hooks/use-fetch-products';
-import { useCartStore } from '../store/cart';
 
 export default function Home() {
   const { products, error } = useFetchProducts();
+
   const [term, setTerm] = useState('');
   const [localProducts, setLocalProducts] = useState([]);
-  const addToCard = useCartStore((state) => state.actions.add);
 
   useEffect(() => {
     if (term === '') {
@@ -36,9 +35,7 @@ export default function Home() {
       return <h4 data-testid="no-products">no products message</h4>;
     }
 
-    return localProducts.map((i) => (
-      <ProductCard key={i.title} product={i} addToCard={addToCard} />
-    ));
+    return localProducts.map((i) => <ProductCard key={i.title} product={i} />);
   };
 
   const amountText = useMemo(() => {
