@@ -6,10 +6,11 @@ import { useFetchProducts } from '../hooks/use-fetch-products';
 import { useCartStore } from '../store/cart';
 
 export default function Home() {
-  const { products, error } = useFetchProducts();
   const [term, setTerm] = useState('');
   const [localProducts, setLocalProducts] = useState([]);
-  const addToCard = useCartStore((state) => state.actions.add);
+
+  const { products, error } = useFetchProducts();
+  const addToCard = useCartStore((store) => store.actions.add);
 
   useEffect(() => {
     if (term === '') {
