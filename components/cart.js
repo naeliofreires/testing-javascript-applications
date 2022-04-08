@@ -3,6 +3,7 @@ import { useCartStore } from '../store/cart';
 
 export default function Cart() {
   const open = useCartStore((store) => store.state.open);
+  const clear = useCartStore((store) => store.actions.clear);
   const toogle = useCartStore((store) => store.actions.toogle);
   const products = useCartStore((store) => store.state.products);
 
@@ -10,9 +11,7 @@ export default function Cart() {
     return products.map((product) => <CartItem key={product.id} product={product} />);
   };
 
-  const renderProducts = () => {
-    return products.map((product) => <CartItem product={product} />);
-  };
+  const isEmpty = products.length === 0;
 
   return (
     <div
@@ -43,30 +42,44 @@ export default function Cart() {
       </div>
       <hr className="my-3" />
 
+      <button
+        onClick={() => clear()}
+        data-testid="clear-button"
+        type="button"
+        style={{
+          padding: 4,
+          color: 'white',
+          borderRadius: 8,
+          margin: '16px auto',
+          backgroundColor: '#000',
+        }}
+      >
+        Clear
+      </button>
+
       {renderCartItem()}
 
-      <div className="mt-8">
-        <form className="flex items-center justify-center">
-          <input className="form-input w-48" type="text" placeholder="Add promocode" />
-          <button className="ml-3 flex items-center px-3 py-2 bg-blue-600 text-white text-sm uppercase font-medium rounded hover:bg-blue-500 focus:outline-none focus:bg-blue-500">
-            <span>Apply</span>
-          </button>
-        </form>
-      </div>
-      <a className="flex items-center justify-center mt-4 px-3 py-2 bg-blue-600 text-white text-sm uppercase font-medium rounded hover:bg-blue-500 focus:outline-none focus:bg-blue-500">
-        <span>Chechout</span>
-        <svg
-          className="h-5 w-5 mx-2"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+      {isEmpty ? (
+        <h3 data-testid="empty-cart-message">You have not selected any products.</h3>
+      ) : (
+        <a
+          data-testid="checkout-button"
+          className="flex items-center justify-center mt-4 px-3 py-2 bg-blue-600 text-white text-sm uppercase font-medium rounded hover:bg-blue-500 focus:outline-none focus:bg-blue-500"
         >
-          <path d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-        </svg>
-      </a>
+          <span>Checkout</span>
+          <svg
+            className="h-5 w-5 mx-2"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+          </svg>
+        </a>
+      )}
     </div>
   );
 }

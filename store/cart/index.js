@@ -29,5 +29,29 @@ export const useCartStore = create((set) => ({
       set((store) => {
         return { ...store, state: { ...store.state, open: false, products: [] } };
       }),
+
+    remove: (product) =>
+      set((store) => {
+        const _filteredStore = store.state.products.filter((i) => i.id !== product.id);
+
+        return {
+          ...store,
+          state: {
+            ...store.state,
+            products: _filteredStore,
+          },
+        };
+      }),
+
+    clear: () =>
+      set((store) => {
+        return {
+          ...store,
+          state: {
+            ...store.state,
+            products: [],
+          },
+        };
+      }),
   },
 }));
