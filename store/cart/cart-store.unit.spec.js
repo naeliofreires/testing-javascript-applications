@@ -80,4 +80,47 @@ describe('Cart Store', () => {
 
     expect(result.current.state.products).toHaveLength(2);
   });
+
+  it('should remove a product from the store', () => {
+    const productA = server.create('product');
+    const productB = server.create('product');
+
+    HooksAction(() => {
+      result.current.actions.add(productA);
+      result.current.actions.add(productB);
+    });
+
+    expect(result.current.state.products).toHaveLength(2);
+
+    HooksAction(() => {
+      result.current.actions.remove(productB);
+    });
+
+    expect(result.current.state.products).toHaveLength(1);
+    expect(result.current.state.products[0]).toEqual(productA);
+  });
+
+  it('should clear the cart', () => {
+    const products = server.createList('product', 10);
+
+    for (const product of products) {
+      HooksAction(() => {
+        result.current.actions.add(product);
+      });
+    }
+
+    expect(result.current.state.products).toHaveLength(10);
+
+    HooksAction(() => {
+      result.current.actions.remove(products[0]);
+    });
+
+    expect(result.current.state.products).toHaveLength(9);
+
+    HooksAction(() => {
+      result.current.actions.clear();
+    });
+
+    expect(result.current.state.products).toHaveLength(0);
+  });
 });

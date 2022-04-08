@@ -1,4 +1,7 @@
-import { screen, render, fireEvent, getAllByRole } from '@testing-library/react';
+import { screen, render, fireEvent } from '@testing-library/react';
+import { useCartStore } from '../store/cart';
+const { renderHook, act } = require('@testing-library/react-hooks');
+
 import CartItem from './cart-item';
 
 const product = {
@@ -9,6 +12,22 @@ const product = {
 };
 
 describe('CartItem', () => {
+  let spy;
+  let result;
+
+  beforeEach(() => {
+    result = renderHook(() => useCartStore()).result;
+    spy = jest.spyOn(result.current.actions, 'remove');
+  });
+
+  afterEach(async () => {
+    jest.clearAllMocks();
+
+    act(() => {
+      result.current.actions.reset();
+    });
+  });
+
   it('should render CartItem', () => {
     render(<CartItem product={product} />);
 
@@ -56,7 +75,7 @@ describe('CartItem', () => {
     expect(screen.getByTestId('quantity').textContent).toBe('1');
   });
 
-  it('should not go below zero in the quantity', async () => {
+  it('should remove the product if the quantity is equals 1', async () => {
     render(<CartItem product={product} />);
 
     const [decreaseButton] = screen.getAllByRole('button');
@@ -64,8 +83,7 @@ describe('CartItem', () => {
     expect(screen.getByTestId('quantity').textContent).toBe('1');
 
     await fireEvent.click(decreaseButton);
-    await fireEvent.click(decreaseButton);
 
-    expect(screen.getByTestId('quantity').textContent).toBe('0');
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });

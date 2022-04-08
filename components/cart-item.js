@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useCartStore } from '../store/cart';
 
 export default function CartItem({ product }) {
+  const remove = useCartStore((store) => store.actions.remove);
   const [quantity, setQuantity] = useState(1);
 
   const increase = () => {
@@ -8,7 +10,11 @@ export default function CartItem({ product }) {
   };
 
   const decrease = () => {
-    setQuantity(quantity > 0 ? quantity - 1 : 0);
+    if (quantity === 1) {
+      remove(product);
+    } else {
+      setQuantity(quantity - 1);
+    }
   };
 
   return (
@@ -36,14 +42,17 @@ export default function CartItem({ product }) {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <path d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </button>
+
             <span data-testid="quantity" className="text-gray-700 mx-2">
               {quantity}
             </span>
+
             <button
               onClick={increase}
+              style={{ zIndex: 1 }}
               className="text-gray-500 focus:outline-none focus:text-gray-600"
             >
               <svg
@@ -55,7 +64,7 @@ export default function CartItem({ product }) {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </button>
           </div>

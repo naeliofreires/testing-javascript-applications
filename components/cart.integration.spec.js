@@ -7,14 +7,17 @@ import { useCartStore } from '../store/cart';
 import { makeServer } from '../miragejs/server';
 
 describe('Cart Store', () => {
-  let spy;
+  let toogleSpy;
+  let clearSpy;
   let server;
   let result;
 
   beforeEach(() => {
     server = makeServer({ environment: 'test' });
     result = renderHook(() => useCartStore()).result;
-    spy = jest.spyOn(result.current.actions, 'toogle');
+
+    clearSpy = jest.spyOn(result.current.actions, 'clear');
+    toogleSpy = jest.spyOn(result.current.actions, 'toogle');
   });
 
   afterEach(async () => {
@@ -50,7 +53,7 @@ describe('Cart Store', () => {
     await userEvent.click(button);
     await userEvent.click(button);
 
-    expect(spy).toHaveBeenCalledTimes(2);
+    expect(toogleSpy).toHaveBeenCalledTimes(2);
   });
 
   it('should call store toggle() twice ', async () => {
@@ -65,5 +68,44 @@ describe('Cart Store', () => {
     });
 
     expect(screen.getAllByTestId('cart-item')).toHaveLength(2);
+  });
+
+  it('should show empty message if have not selected any product', async () => {
+    render(<Cart />);
+
+    expect(screen.getByTestId('empty-cart-message')).toBeInTheDocument();
+  });
+
+  it('should show checkout button if have at least 1 product', async () => {
+    render(<Cart />);
+
+    const product = server.create('product');
+
+    act(() => {
+      result.current.actions.add(product);
+    });
+
+    expect(screen.getByTestId('checkout-button')).toBeInTheDocument();
+  });
+
+  it('should clear the all products after the click on the clear button', async () => {
+    render(<Cart />);
+
+    const products = server.createList('product', 10);
+
+    act(() => {
+      for (const product of products) {
+        result.current.actions.add(product);
+      }
+    });
+
+    expect(result.current.state.products).toHaveLength(10);
+
+    const clearButton = screen.getByTestId('clear-button');
+
+    await userEvent.click(clearButton);
+
+    expect(result.current.state.products).toHaveLength(0);
+    expect(clearSpy).toHaveBeenCalledTimes(1);
   });
 });
