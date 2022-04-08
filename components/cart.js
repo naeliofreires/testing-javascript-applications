@@ -42,20 +42,22 @@ export default function Cart() {
       </div>
       <hr className="my-3" />
 
-      <button
-        onClick={() => clear()}
-        data-testid="clear-button"
-        type="button"
-        style={{
-          padding: 4,
-          color: 'white',
-          borderRadius: 8,
-          margin: '16px auto',
-          backgroundColor: '#000',
-        }}
-      >
-        Clear
-      </button>
+      {isEmpty ? null : (
+        <button
+          onClick={() => clear()}
+          data-testid="clear-button"
+          type="button"
+          style={{
+            padding: 4,
+            color: 'white',
+            borderRadius: 8,
+            margin: '16px auto',
+            backgroundColor: '#000',
+          }}
+        >
+          Clear
+        </button>
+      )}
 
       {renderCartItem()}
 

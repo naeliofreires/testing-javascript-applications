@@ -37,11 +37,7 @@ describe('Cart Store', () => {
 
     HooksAction(() => {
       result.current.actions.add(productA);
-    });
-    HooksAction(() => {
       result.current.actions.add(productA);
-    });
-    HooksAction(() => {
       result.current.actions.add(productB);
     });
 
@@ -97,6 +93,58 @@ describe('Cart Store', () => {
 
     expect(result.current.state.open).toBe(true);
     expect(result.current.state.products).toHaveLength(2);
+  });
+
+  it('should assign 1 as iniial quantity on product add()', () => {
+    const product = server.create('product');
+
+    HooksAction(() => {
+      result.current.actions.add(product);
+    });
+
+    expect(result.current.state.products[0].quantity).toBe(1);
+  });
+
+  it('should increase quantity', () => {
+    const product = server.create('product');
+
+    HooksAction(() => {
+      result.current.actions.add(product);
+      result.current.actions.increase(product);
+    });
+
+    expect(result.current.state.products[0].quantity).toBe(2);
+  });
+
+  it('should decrease quantity', () => {
+    const product = server.create('product');
+
+    HooksAction(() => {
+      result.current.actions.add(product);
+      result.current.actions.increase(product);
+      result.current.actions.decrease(product);
+    });
+
+    expect(result.current.state.products[0].quantity).toBe(1);
+  });
+
+  it('should remove if quantity is zero', () => {
+    const productA = server.create('product');
+    const productB = server.create('product');
+
+    HooksAction(() => {
+      result.current.actions.add(productA);
+      result.current.actions.add(productB);
+    });
+
+    expect(result.current.state.products).toHaveLength(2);
+
+    HooksAction(() => {
+      result.current.actions.decrease(productA);
+    });
+
+    expect(result.current.state.products).toHaveLength(1);
+    expect(result.current.state.products[0]).toEqual(productB);
   });
 
   it('should not add the same product twice', async () => {

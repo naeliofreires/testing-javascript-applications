@@ -1,29 +1,39 @@
-import { screen, render, fireEvent } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useCartStore } from '../store/cart';
-const { renderHook, act } = require('@testing-library/react-hooks');
+const { renderHook, act: hookAct } = require('@testing-library/react-hooks');
+import TestRenderer from 'react-test-renderer';
+import { makeServer } from '../miragejs/server';
+const { act: componentAct } = TestRenderer;
 
 import CartItem from './cart-item';
 
 const product = {
   title: 'Rélogio do Nana',
+  quantity: 1,
   price: '99.00',
   image:
     'https://images.unsplash.com/photo-1495856458515-0637185db551?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80',
 };
 
 describe('CartItem', () => {
-  let spy;
+  let server;
   let result;
+  let decreaseSpy;
+  let increaseSpy;
 
   beforeEach(() => {
+    server = makeServer({ environment: 'test' });
     result = renderHook(() => useCartStore()).result;
-    spy = jest.spyOn(result.current.actions, 'remove');
+    decreaseSpy = jest.spyOn(result.current.actions, 'decrease');
+    increaseSpy = jest.spyOn(result.current.actions, 'increase');
   });
 
   afterEach(async () => {
     jest.clearAllMocks();
 
-    act(() => {
+    server.shutdown();
+    hookAct(() => {
       result.current.actions.reset();
     });
   });
@@ -45,45 +55,32 @@ describe('CartItem', () => {
     expect(image).toHaveProperty('alt', product.title);
   });
 
-  it('should display 1 as initial quantity', () => {
-    render(<CartItem product={product} />);
+  it('should remove item from the cart when decrease() is called and quantity is equals 1', async () => {
+    const _product = server.create('product');
 
-    expect(screen.getByTestId('quantity').textContent).toBe('1');
+    hookAct(() => result.current.actions.add(_product));
+
+    render(<CartItem product={_product} />);
+    const button = screen.getByTestId('decrease-button');
+
+    await componentAct(async () => await userEvent.click(button));
+
+    expect(decreaseSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should increase quantity by 1 when first button is clicked', async () => {
-    render(<CartItem product={product} />);
+  it('should increase of the quantity when user clicks in the increase button', async () => {
+    const _product = server.create('product');
 
-    const [button] = screen.getAllByRole('button');
+    hookAct(() => result.current.actions.add(_product));
+    expect(result.current.state.products).toHaveLength(1);
+    expect(result.current.state.products[0].quantity).toBe(1);
 
-    await fireEvent.click(button);
+    render(<CartItem product={_product} />);
+    const button = screen.getByTestId('increase-button');
 
-    expect(screen.getByTestId('quantity').textContent).toBe('2');
-  });
+    await componentAct(async () => await userEvent.click(button));
 
-  it('should decrease quantity by 1 when second button is clicked', async () => {
-    render(<CartItem product={product} />);
-
-    const [increaseButton, decreaseButton] = screen.getAllByRole('button');
-
-    await fireEvent.click(increaseButton);
-
-    expect(screen.getByTestId('quantity').textContent).toBe('2');
-
-    await fireEvent.click(decreaseButton);
-
-    expect(screen.getByTestId('quantity').textContent).toBe('1');
-  });
-
-  it('should remove the product if the quantity is equals 1', async () => {
-    render(<CartItem product={product} />);
-
-    const [, decreaseButton] = screen.getAllByRole('button');
-
-    expect(screen.getByTestId('quantity').textContent).toBe('1');
-
-    await fireEvent.click(decreaseButton);
-
-    expect(spy).toHaveBeenCalledTimes(1);
+    expect(increaseSpy).toHaveBeenCalledTimes(1);
+    expect(result.current.state.products[0].quantity).toBe(2);
   });
 });

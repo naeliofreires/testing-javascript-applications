@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react';
-const { renderHook, act } = require('@testing-library/react-hooks');
+import TestRenderer from 'react-test-renderer';
+const { renderHook, act: hooksAct } = require('@testing-library/react-hooks');
 import userEvent from '@testing-library/user-event';
+const { act: componentAct } = TestRenderer;
 
 import Cart from './cart';
 import { useCartStore } from '../store/cart';
@@ -23,20 +25,23 @@ describe('Cart Store', () => {
   afterEach(async () => {
     server.shutdown();
     jest.clearAllMocks();
+  });
 
-    act(() => {
+  const resetStore = () => {
+    hooksAct(() => {
       result.current.actions.reset();
     });
-  });
+  };
 
   it('should  add css class "hidden" in the component', async () => {
     render(<Cart />);
-
     expect(screen.getByTestId('cart')).toHaveClass('hidden');
   });
 
   it('should not add css class "hidden" in the component', async () => {
-    act(() => {
+    resetStore();
+
+    hooksAct(() => {
       result.current.actions.toogle();
     });
 
@@ -46,54 +51,57 @@ describe('Cart Store', () => {
   });
 
   it('should call store toggle() twice ', async () => {
-    render(<Cart />);
+    await componentAct(async () => {
+      render(<Cart />);
 
-    const button = screen.getByTestId('close-button');
+      const button = screen.getByTestId('close-button');
 
-    await userEvent.click(button);
-    await userEvent.click(button);
+      await userEvent.click(button);
+      await userEvent.click(button);
 
-    expect(toogleSpy).toHaveBeenCalledTimes(2);
+      expect(toogleSpy).toHaveBeenCalledTimes(2);
+    });
   });
 
-  it('should call store toggle() twice ', async () => {
-    render(<Cart />);
-
+  it('should display 2 products cards ', async () => {
+    resetStore();
     const products = server.createList('product', 2);
 
-    act(() => {
+    hooksAct(() => {
       for (const product of products) {
         result.current.actions.add(product);
       }
     });
 
+    render(<Cart />);
     expect(screen.getAllByTestId('cart-item')).toHaveLength(2);
   });
 
   it('should show empty message if have not selected any product', async () => {
+    resetStore();
     render(<Cart />);
 
     expect(screen.getByTestId('empty-cart-message')).toBeInTheDocument();
   });
 
   it('should show checkout button if have at least 1 product', async () => {
-    render(<Cart />);
-
+    resetStore();
     const product = server.create('product');
 
-    act(() => {
+    hooksAct(() => {
       result.current.actions.add(product);
     });
+
+    render(<Cart />);
 
     expect(screen.getByTestId('checkout-button')).toBeInTheDocument();
   });
 
   it('should clear the all products after the click on the clear button', async () => {
-    render(<Cart />);
-
+    resetStore();
     const products = server.createList('product', 10);
 
-    act(() => {
+    hooksAct(() => {
       for (const product of products) {
         result.current.actions.add(product);
       }
@@ -101,11 +109,23 @@ describe('Cart Store', () => {
 
     expect(result.current.state.products).toHaveLength(10);
 
+    render(<Cart />); // it must be here
+
     const clearButton = screen.getByTestId('clear-button');
 
-    await userEvent.click(clearButton);
+    await componentAct(async () => {
+      userEvent.click(clearButton);
+    });
 
     expect(result.current.state.products).toHaveLength(0);
     expect(clearSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not show clear button when have not selected any product', () => {
+    resetStore();
+
+    render(<Cart />);
+
+    expect(screen.queryAllByTestId('clear-button')).toHaveLength(0);
   });
 });
